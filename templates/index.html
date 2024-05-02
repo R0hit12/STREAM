@@ -27,17 +27,22 @@
             chatBox.appendChild(messageElement);
         }
 
-        // Function to append bot responses to the <p> tag
-        function appendBotResponse(response) {
-            const botResponses = document.getElementById('bot-responses');
-            if (response.trim() !== '') { // Check if response is not empty
-                if (botResponses.innerText.trim() === '') { // Check if botResponses is empty
-                    botResponses.innerText += response.trim(); // Append response without space if empty
-                } else {
-                    botResponses.innerText += ' ' + response.trim(); // Append response with space if not empty
-                }
+// Function to append bot responses to the <p> tag
+function appendBotResponse(response) {
+    const botResponses = document.getElementById('bot-responses');
+    if (response.trim() !== '') { // Check if response is not empty
+        if (response.trim() === '__END_OF_RESPONSES__') {
+            botResponses.innerHTML += '<br>'; // Replace __END_OF_RESPONSES__ with a line break
+        } else {
+            if (botResponses.innerText.trim() === '') { // Check if botResponses is empty
+                botResponses.innerText += response.trim(); // Append response without space if empty
+            } else {
+                botResponses.innerHTML += ' ' + response.trim(); // Append response with space if not empty
             }
         }
+    }
+}
+
  
         // Function to send user input to the server and receive responses
         async function sendMessage() {

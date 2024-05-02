@@ -43,6 +43,9 @@ def stream_completions(request):
                             # Yield each completion as a JSON response
                             yield json.dumps({'completion': completion}) + '\n'
 
+                # Signal the end of responses
+                yield json.dumps({'completion': '__END_OF_RESPONSES__'}) + '\n'
+
             # Return a streaming HTTP response with the generated JSON responses
             return StreamingHttpResponse(generate_json_response(), content_type='application/json')
         else:
