@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+</head>
+<body>
+    <div id="chat-box">
+        <!-- Chat messages will be displayed here -->
+    </div>
+    <input type="text" id="user-input" placeholder="Type your message here...">
+    <button id="send-btn">Send</button>
+
+    <input type="hidden" id="csrf-token" value="{% csrf_token %}"> <!-- CSRF token -->
+
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        // Function to display messages in the chat box
+        function displayMessage(message) {
+            const messageElement = document.createElement('div');
+            messageElement.innerText = message;
+            chatBox.appendChild(messageElement);
+        }
+
+        // Function to send user input to the server and receive responses
+        async function sendMessage() {
+            const userMessage = userInput.value.trim();
+            console.log(userMessage);
+            if (userMessage !== '') {
+                displayMessage(`You: ${userMessage}`);
+                userInput.value = '';
+
+                // Get CSRF token from the hidden input field
+                const csrfToken = document.getElementById('csrf-token').value;
+
+                // Send user message to the server with CSRF token
+                const response = await fetch('/stream/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken // Include CSRF token in the headers
+                    },
+                    body: JSON.stringify({ message: userMessage })
+                });
+                if (response.ok) {
+                    // Receive and display model response
+                    const responseData = await response.json();
+                    displayMessage(`Model: ${responseData.completion}`);
+                } else {
+                    displayMessage('Error: Failed to get response from server');
+                }
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Streaming Completions</title>
+</head>
+<body>
+<h1>Streaming Completions</h1>
+<ul id="completionList"></ul>
+
+<script>
+function streamCompletions() {
+    const completionList = document.getElementById('completionList');
+
+    // Function to update the completion list with new completions
+    function updateCompletionList(completion) {
+        const listItem = document.createElement('li');
+        listItem.textContent = completion;
+        completionList.appendChild(listItem);
+    }
+
+    // Function to fetch completions from the server
+    function fetchCompletions() {
+        fetch('/completions')
+            .then(response => response.json())
+            .then(data => {
+                if (data.completion) {
+                    updateCompletionList(data.completion);
+                }
+                fetchCompletions(); // Fetch completions recursively
+            })
+            .catch(error => {
+                console.error('Error fetching completions:', error);
+            });
+    }
+
+    // Start streaming completions
+    fetchCompletions();
+}
+
+// Start streaming completions when the page loads
+window.onload = streamCompletions;
+</script>
+</body>
+</html>
