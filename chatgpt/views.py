@@ -27,31 +27,30 @@ def stream_completions(request):
         user_message = data.get('message', '')
         print("User Message:", user_message)  # Add this line for debugging
         if user_message:
-
-            # Send user message to GPT-3.5 and stream responses
             messages = [{"role": "user", "content": user_message}]
-            # Assuming you have already initialized the OpenAI client
-            # and assigned it to the variable `client`
             response = client.chat.completions.create(
                 messages=messages,
                 model="openai/gpt-3.5-turbo",
                 stream=True
             )
-            completion = ""
-            for chunk in response:
-                # print(chunk,"this is chunk")
-                if chunk.choices:
-                    for choice in chunk.choices:
-                        completion += choice.delta.content
-                        print(completion)
 
-            return JsonResponse({'completion': completion})
+            # Define a generator function to yield JSON responses
+            def generate_json_response():
+                for chunk in response:
+                    if chunk.choices:
+                        for choice in chunk.choices:
+                            completion = choice.delta.content
+                            # Yield each completion as a JSON response
+                            yield json.dumps({'completion': completion}) + '\n'
+
+            # Return a streaming HTTP response with the generated JSON responses
+            return StreamingHttpResponse(generate_json_response(), content_type='application/json')
         else:
             return JsonResponse({'error': 'Empty message'}, status=400)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=400)
 
-
+ 
 
 # def stream_view(request):
 #     return StreamingHttpResponse(stream_completions(), content_type='text/plain')
